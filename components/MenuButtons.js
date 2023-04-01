@@ -1,12 +1,9 @@
 import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
 import React from "react";
 
-const Menu = () => {
-  const startGame = () => {
-    console.log("Start game");
-  };
+const MenuButtons = ({ onPress }) => {
   return (
-    <TouchableOpacity style={styles.container} onPress={startGame}>
+    <TouchableOpacity style={styles.container} onPress={onPress}>
       <View>
         <Text style={styles.text}>Play Word Challange</Text>
       </View>
@@ -28,4 +25,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default Menu;
+export default MenuButtons;
