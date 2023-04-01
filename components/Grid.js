@@ -1,6 +1,6 @@
 import { View, Text, StyleSheet } from "react-native";
 import React from "react";
-
+import Matrix from "./Matrix";
 export default function Grid() {
   return (
     <View style={styles.map}>
@@ -18,7 +18,9 @@ export default function Grid() {
         <View style={styles.cell}></View>
         <View style={styles.cell}></View>
       </View>
+      <Matrix style={styles.matrix}></Matrix>
     </View>
+    
   );
 }
 
