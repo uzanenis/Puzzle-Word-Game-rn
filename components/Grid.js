@@ -1,5 +1,6 @@
 import { View, Text, StyleSheet } from "react-native";
 import React from "react";
+import { useState } from "react";
 
 export default function Grid() {
   return (
@@ -9,6 +10,13 @@ export default function Grid() {
         <View style={styles.cell}></View>
         <View style={styles.cell}></View>
         <View style={styles.cell}></View>
+        <View style={styles.cell}></View>
+        <View style={styles.cell}></View>
+        <View style={styles.cell}></View>
+        <View style={styles.cell}></View>
+      </View>
+
+      <View style={styles.row}>
         <View style={styles.cell}></View>
         <View style={styles.cell}></View>
         <View style={styles.cell}></View>
@@ -30,17 +38,17 @@ const styles = StyleSheet.create({
   },
 
   row: {
-    backgroundColor: "red",
     flexDirection: "row",
     alignSelf: "stretch",
-    height: 50,
   },
 
   cell: {
     backgroundColor: "green",
     flex: 1,
-    height: 30,
+    aspectRatio: 1,
     borderWidth: 1,
     borderColor: "black",
+    margin: 2,
+    //maxWidth: 50,
   },
 });
