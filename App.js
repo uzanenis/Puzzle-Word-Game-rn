@@ -3,6 +3,7 @@ import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import Menu from "./screens/Menu";
 import Game from "./screens/Game";
+import Matrix from "./components/Matrix";
 
 const Stack = createNativeStackNavigator();
 export default function App() {
