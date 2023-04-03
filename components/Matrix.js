@@ -40,13 +40,12 @@ const Matrix = () => {
       }
     }
 
-    // matrisi güncelle
     if (isValid) {
-      for (let i = 1; i < newMatrix.length; i++) {
+      for (let i = newMatrix.length - 2; i >= 0; i--) {
         for (let j = 0; j < newMatrix[i].length; j++) {
-          if (newMatrix[i][j] === '') {
-            newMatrix[i][j] = newMatrix[i - 1][j];
-            newMatrix[i - 1][j] = ''; // üstte kalan değerler için kontrol gerekecek. şimdilik böyle
+          if (newMatrix[i][j] !== '' && newMatrix[i+1][j] === '') {
+            newMatrix[i+1][j] = newMatrix[i][j];
+            newMatrix[i][j] = '';
           }
         }
       }
