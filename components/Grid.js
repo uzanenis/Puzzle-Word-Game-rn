@@ -1,18 +1,25 @@
-import { View, StyleSheet, Text } from "react-native";
+import {
+  View,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+} from "react-native";
 import { useState, useEffect } from "react";
 
 export default function Grid() {
-  const [matrix, setMatrix] = useState(Array(8).fill(Array(10).fill("")));
-  const [position, setPosition] = useState({ top: 0, left: 50 });
+  const [matrix, setMatrix] = useState(Array(10).fill(Array(8).fill("")));
+  const [inputValue, setInputValue] = useState("");
+  const [lettersIndex, setLettersIndex] = useState([]);
   useEffect(() => {
     // 8. satır için rastgele harfler oluştur
-    let row8 = getRandomLetters(10);
+    let row10 = getRandomLetters(8);
     // 7. satır için rastgele harfler oluştur
-    let row7 = getRandomLetters(10);
+    let row9 = getRandomLetters(8);
     // 6. satır için rastgele harfler oluştur
-    let row6 = getRandomLetters(10);
+    let row8 = getRandomLetters(8);
     // matrisi güncelle
-    setMatrix([...matrix.slice(0, 5), row6, row7, row8]);
+    setMatrix([...matrix.slice(0, 7), row8, row9, row10]);
   }, []);
 
   // rastgele harfler üreten bir fonksiyon
@@ -83,79 +90,83 @@ export default function Grid() {
     return letters;
   };
 
-  const addPositions = () => {
-    const newPositions = matrix.map((row, rowIndex) => {
-      return row.map((letter, columnIndex) => {
-        return {
-          top: rowIndex * 50,
-          left: columnIndex * 50,
-        };
-      });
-    });
-    setPosition(newPositions);
+  const letterClick = (letter, rowIndex, columnIndex) => {
+    setInputValue(inputValue + letter);
+    setLettersIndex([...lettersIndex, [rowIndex, columnIndex]]);
   };
-
-  setInterval(() => {
-    //addPositions();
-    const newPositions = { top: position.top + 50, left: position.left };
-    setPosition(newPositions);
-
-    if (position.top > 200) {
-      setPosition({ top: 0, left: 50 });
-      return clearInterval();
-    }
-  }, 100);
 
   const checkWord = () => {
     let word = inputValue.trim().toLowerCase();
     let newMatrix = [...matrix];
     let isValid = true;
+    let lettersIndexes = [...lettersIndex];
 
     // kelimeyi oluşturan harfler matriste yoksa, isValid değişkenini false yap
-    for (let i = 0; i < word.length; i++) {
-      let found = false;
-      for (let j = 0; j < newMatrix.length; j++) {
-        if (newMatrix[j].includes(word[i])) {
-          found = true;
-          newMatrix[j][newMatrix[j].indexOf(word[i])] = "";
-          break;
-        }
-      }
-      if (!found) {
-        isValid = false;
-        break;
-      }
-    }
+    // for (let i = 0; i < word.length; i++) {
+    //   let found = false;
+    //   for (let j = 0; j < newMatrix.length; j++) {
+    //     if (newMatrix[j].includes(word[i])) {
+    //       found = true;
+    //       newMatrix[j][newMatrix[j].indexOf(word[i])] = "";
+    //       break;
+    //     }
+    //   }
+    //   if (!found) {
+    //     isValid = false;
+    //     break;
+    //   }
+    // }
 
     // matrisi güncelle
     if (isValid) {
-      for (let i = 1; i < newMatrix.length; i++) {
-        for (let j = 0; j < newMatrix[i].length; j++) {
-          if (newMatrix[i][j] === "") {
-            newMatrix[i][j] = newMatrix[i - 1][j];
-            newMatrix[i - 1][j] = ""; // üstte kalan değerler için kontrol gerekecek. şimdilik böyle
-          }
+      // for (let i = newMatrix.length - 2; i >= 0; i--) {
+      //   for (let j = 0; j < newMatrix[i].length; j++) {
+      //     if (newMatrix[i][j] !== "" && newMatrix[i + 1][j] === "") {
+      //       newMatrix[i + 1][j] = newMatrix[i][j];
+      //       newMatrix[i][j] = "";
+      //     }
+      //   }
+      // }
+
+      // harfleri matristen kaldır
+      for (let i = 0; i < lettersIndexes.length; i++) {
+        let [rowIndex, columnIndex] = lettersIndexes[i];
+        console.log(rowIndex, columnIndex);
+        for (let j = rowIndex; j > 0; j--) {
+          newMatrix[j][columnIndex] = newMatrix[j - 1][columnIndex];
         }
       }
+
       setMatrix(newMatrix);
       setInputValue("");
+      setLettersIndex([]);
     }
   };
 
   return (
     <View style={styles.map}>
-      <View style={[styles.box, position]}>
-        <Text>A</Text>
-      </View>
       {matrix.map((row, rowIndex) => (
         <View key={rowIndex} style={styles.row}>
           {row.map((letter, columnIndex) => (
-            <View key={columnIndex} style={styles.cell}>
+            <TouchableOpacity
+              key={columnIndex}
+              style={styles.cell}
+              onPress={() => letterClick(letter, rowIndex, columnIndex)}
+            >
               <Text style={styles.letter}>{letter}</Text>
-            </View>
+            </TouchableOpacity>
           ))}
         </View>
       ))}
+      <TextInput
+        style={styles.input}
+        placeholder="Kelime girin"
+        value={inputValue}
+        onChangeText={(text) => setInputValue(text)}
+      />
+      <TouchableOpacity style={styles.button} onPress={checkWord}>
+        <Text style={styles.buttonText}>Kelimeyi Kontrol Et</Text>
+      </TouchableOpacity>
     </View>
   );
 }
@@ -187,7 +198,7 @@ const styles = StyleSheet.create({
 
   letter: {
     color: "white",
-    fontSize: 20,
+    fontSize: 21,
   },
 
   box: {
@@ -197,5 +208,16 @@ const styles = StyleSheet.create({
     height: 50,
     justifyContent: "center",
     alignItems: "center",
+  },
+
+  input: {
+    borderWidth: 1,
+    borderColor: "black",
+    padding: 10,
+    marginVertical: 10,
+    fontSize: 20,
+    minWidth: 250,
+    maxWidth: 250,
+    borderRadius: 5,
   },
 });
