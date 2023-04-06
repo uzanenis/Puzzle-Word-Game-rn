@@ -22,8 +22,47 @@ export default function Grid() {
     setMatrix([...matrix.slice(0, 7), row8, row9, row10]);
   }, []);
 
+  const getRandomLetter = () => {
+    const letters = ["a", "e", "ı", "i", "o", "ö", "u", "ü", "b", "c", "ç", "d", "f", "g", "ğ", "h", "j", "k", "l", "m", "n", "p", "r", "s", "ş", "t", "v", "y", "z"];
+    return letters[Math.floor(Math.random() * letters.length)];
+  };
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      let counter = 0;
+      setMatrix((prevMatrix) => {
+        const newMatrix = prevMatrix.map((row) => [...row]); // matrix kopyasını oluştur
+        for (let j = 0; j < newMatrix[0].length; j++) {
+          let filled = false; // hücre dolduruldu mu kontrolü
+          for (let i = newMatrix.length - 1; i >= 0; i--) {
+            if (newMatrix[i][j] === "" && newMatrix[i + 1][j] !== "" && !filled) {
+              const randomLetter = getRandomLetter();
+              newMatrix[i][j] = randomLetter;
+              filled = true; // hücre dolduruldu
+              if (i == 0)
+                counter++;
+                counter === matrix[matrix.length - 1].length ? console.log("Kaybettin") : console.log("Devam")
+            }
+          }
+        }
+        return newMatrix;
+      });
+    }, 1000);
+    return () => clearInterval(interval);
+  }, []);
+  
+  
+  
+  
+  
+  
+  
+
+  
+
   // rastgele harfler üreten bir fonksiyon
   const getRandomLetters = (count) => {
+
     const vowels = ["a", "e", "ı", "i", "o", "ö", "u", "ü"];
     const consonants = [
       "b",
@@ -99,44 +138,14 @@ export default function Grid() {
     let word = inputValue.trim().toLowerCase();
     let newMatrix = [...matrix];
     let isValid = true;
-    let lettersIndexes = [...lettersIndex];
-
-    // kelimeyi oluşturan harfler matriste yoksa, isValid değişkenini false yap
-    // for (let i = 0; i < word.length; i++) {
-    //   let found = false;
-    //   for (let j = 0; j < newMatrix.length; j++) {
-    //     if (newMatrix[j].includes(word[i])) {
-    //       found = true;
-    //       newMatrix[j][newMatrix[j].indexOf(word[i])] = "";
-    //       break;
-    //     }
-    //   }
-    //   if (!found) {
-    //     isValid = false;
-    //     break;
-    //   }
-    // }
-
-    // matrisi güncelle
+    let lettersIndexes = [...lettersIndex]
     if (isValid) {
-      // for (let i = newMatrix.length - 2; i >= 0; i--) {
-      //   for (let j = 0; j < newMatrix[i].length; j++) {
-      //     if (newMatrix[i][j] !== "" && newMatrix[i + 1][j] === "") {
-      //       newMatrix[i + 1][j] = newMatrix[i][j];
-      //       newMatrix[i][j] = "";
-      //     }
-      //   }
-      // }
-
-      // harfleri matristen kaldır
       for (let i = 0; i < lettersIndexes.length; i++) {
         let [rowIndex, columnIndex] = lettersIndexes[i];
-        console.log(rowIndex, columnIndex);
         for (let j = rowIndex; j > 0; j--) {
           newMatrix[j][columnIndex] = newMatrix[j - 1][columnIndex];
         }
       }
-
       setMatrix(newMatrix);
       setInputValue("");
       setLettersIndex([]);
