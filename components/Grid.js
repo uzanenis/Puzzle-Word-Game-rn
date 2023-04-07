@@ -6,11 +6,14 @@ import {
   TouchableOpacity,
 } from "react-native";
 import { useState, useEffect } from "react";
+import words from "../words.json";
 
 export default function Grid() {
   const [matrix, setMatrix] = useState(Array(10).fill(Array(8).fill("")));
   const [inputValue, setInputValue] = useState("");
   const [lettersIndex, setLettersIndex] = useState([]);
+
+
   useEffect(() => {
     // 8. satır için rastgele harfler oluştur
     let row10 = getRandomLetters(8);
@@ -26,6 +29,17 @@ export default function Grid() {
     const letters = ["a", "e", "ı", "i", "o", "ö", "u", "ü", "b", "c", "ç", "d", "f", "g", "ğ", "h", "j", "k", "l", "m", "n", "p", "r", "s", "ş", "t", "v", "y", "z"];
     return letters[Math.floor(Math.random() * letters.length)];
   };
+
+  useEffect(() => {
+    // words.json dosyasını oku
+    fetch("../words.json")
+      .then((response) => response.json())
+      .then((data) => {
+        // Okunan verileri işle
+        console.log(data);
+      })
+      .catch((error) => console.error(error));
+  }, []);
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -47,19 +61,10 @@ export default function Grid() {
         }
         return newMatrix;
       });
-    }, 1000);
+    }, 15000);
     return () => clearInterval(interval);
   }, []);
   
-  
-  
-  
-  
-  
-  
-
-  
-
   // rastgele harfler üreten bir fonksiyon
   const getRandomLetters = (count) => {
 
@@ -129,6 +134,22 @@ export default function Grid() {
     return letters;
   };
 
+  const calculatePoint = (word) => {
+    const letterPoints = {
+      a: 1, b: 3, c: 4, ç: 4, d: 3, e: 1, f: 7, g: 5, ğ: 8, h: 5, ı: 2, i: 2,
+      j: 10, k: 1, l: 1, m: 2, n: 1, o: 2, ö: 7, p: 5, r: 1, s: 2, ş: 4, t: 1,
+      u: 3, ü: 7, v: 7, y: 3, z: 4
+    };
+    
+    let point = 0;
+    for (let i = 0; i < word.length; i++) {
+      const letter = word[i];
+      point += letterPoints[letter];
+    }
+    
+    return point;
+  }
+
   const letterClick = (letter, rowIndex, columnIndex) => {
     setInputValue(inputValue + letter);
     setLettersIndex([...lettersIndex, [rowIndex, columnIndex]]);
@@ -138,17 +159,25 @@ export default function Grid() {
     let word = inputValue.trim().toLowerCase();
     let newMatrix = [...matrix];
     let isValid = true;
-    let lettersIndexes = [...lettersIndex]
+    let lettersIndexes = [...lettersIndex];
+    
     if (isValid) {
-      for (let i = 0; i < lettersIndexes.length; i++) {
-        let [rowIndex, columnIndex] = lettersIndexes[i];
-        for (let j = rowIndex; j > 0; j--) {
-          newMatrix[j][columnIndex] = newMatrix[j - 1][columnIndex];
+      if (words.includes(word)) { // kelime listede varsa
+        // matrix'i güncelle
+        for (let i = 0; i < lettersIndexes.length; i++) {
+          let [rowIndex, columnIndex] = lettersIndexes[i];
+          for (let j = rowIndex; j > 0; j--) {
+            newMatrix[j][columnIndex] = newMatrix[j - 1][columnIndex];
+          }
         }
+        setMatrix(newMatrix);
+        setInputValue("");
+        setLettersIndex([]);
+        let totalPoint = calculatePoint(word);
+        console.log(totalPoint);
+      } else {
+        console.log(`${word} is not a valid word!`);
       }
-      setMatrix(newMatrix);
-      setInputValue("");
-      setLettersIndex([]);
     }
   };
 
@@ -221,9 +250,10 @@ const styles = StyleSheet.create({
 
   input: {
     borderWidth: 1,
-    borderColor: "black",
+    borderColor: "white",
     padding: 10,
     marginVertical: 10,
+    marginLeft: 70,
     fontSize: 20,
     minWidth: 250,
     maxWidth: 250,
