@@ -7,12 +7,15 @@ import {
 } from "react-native";
 import { useState, useEffect } from "react";
 import words from "../words.json";
+import Score from "./Score";
 
 export default function Grid() {
   const [matrix, setMatrix] = useState(Array(10).fill(Array(8).fill("")));
   const [inputValue, setInputValue] = useState("");
   const [lettersIndex, setLettersIndex] = useState([]);
-
+  const [score, setScore] = useState(0);
+  const [intervalTime, setIntervalTime] = useState(5000);
+  const [wrongWordCount, setWrongWordCount] = useState(0);
 
   useEffect(() => {
     // 8. satır için rastgele harfler oluştur
@@ -26,20 +29,39 @@ export default function Grid() {
   }, []);
 
   const getRandomLetter = () => {
-    const letters = ["a", "e", "ı", "i", "o", "ö", "u", "ü", "b", "c", "ç", "d", "f", "g", "ğ", "h", "j", "k", "l", "m", "n", "p", "r", "s", "ş", "t", "v", "y", "z"];
+    const letters = [
+      "a",
+      "e",
+      "ı",
+      "i",
+      "o",
+      "ö",
+      "u",
+      "ü",
+      "b",
+      "c",
+      "ç",
+      "d",
+      "f",
+      "g",
+      "ğ",
+      "h",
+      "j",
+      "k",
+      "l",
+      "m",
+      "n",
+      "p",
+      "r",
+      "s",
+      "ş",
+      "t",
+      "v",
+      "y",
+      "z",
+    ];
     return letters[Math.floor(Math.random() * letters.length)];
   };
-
-  useEffect(() => {
-    // words.json dosyasını oku
-    fetch("../words.json")
-      .then((response) => response.json())
-      .then((data) => {
-        // Okunan verileri işle
-        console.log(data);
-      })
-      .catch((error) => console.error(error));
-  }, []);
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -49,25 +71,50 @@ export default function Grid() {
         for (let j = 0; j < newMatrix[0].length; j++) {
           let filled = false; // hücre dolduruldu mu kontrolü
           for (let i = newMatrix.length - 1; i >= 0; i--) {
-            if (newMatrix[i][j] === "" && newMatrix[i + 1][j] !== "" && !filled) {
+            if (
+              newMatrix[i][j] === "" &&
+              newMatrix[i + 1][j] !== "" &&
+              !filled
+            ) {
               const randomLetter = getRandomLetter();
               newMatrix[i][j] = randomLetter;
               filled = true; // hücre dolduruldu
-              if (i == 0)
-                counter++;
-                counter === matrix[matrix.length - 1].length ? console.log("Kaybettin") : console.log("Devam")
+              if (i == 0) counter++;
+              counter === matrix[matrix.length - 1].length
+                ? console.log("Kaybettin")
+                : console.log("Devam");
             }
           }
         }
         return newMatrix;
       });
-    }, 15000);
+    }, intervalTime);
     return () => clearInterval(interval);
   }, []);
-  
+
+  // 3 kere yanlış girildiğinde bir satırlık kelime ekliyor
+  const addLetterRow = () => {
+    let counter = 0;
+
+    const newMatrix = matrix.map((row) => [...row]); // matrix kopyasını oluştur
+    for (let j = 0; j < newMatrix[0].length; j++) {
+      let filled = false; // hücre dolduruldu mu kontrolü
+      for (let i = newMatrix.length - 1; i >= 0; i--) {
+        if (newMatrix[i][j] === "" && newMatrix[i + 1][j] !== "" && !filled) {
+          const randomLetter = getRandomLetter();
+          newMatrix[i][j] = randomLetter;
+          filled = true; // hücre dolduruldu
+          if (i == 0) counter++;
+          counter === matrix[matrix.length - 1].length
+            ? console.log("Kaybettin")
+            : console.log("Letter rain");
+        }
+      }
+    }
+    return newMatrix;
+  };
   // rastgele harfler üreten bir fonksiyon
   const getRandomLetters = (count) => {
-
     const vowels = ["a", "e", "ı", "i", "o", "ö", "u", "ü"];
     const consonants = [
       "b",
@@ -136,21 +183,48 @@ export default function Grid() {
 
   const calculatePoint = (word) => {
     const letterPoints = {
-      a: 1, b: 3, c: 4, ç: 4, d: 3, e: 1, f: 7, g: 5, ğ: 8, h: 5, ı: 2, i: 2,
-      j: 10, k: 1, l: 1, m: 2, n: 1, o: 2, ö: 7, p: 5, r: 1, s: 2, ş: 4, t: 1,
-      u: 3, ü: 7, v: 7, y: 3, z: 4
+      a: 1,
+      b: 3,
+      c: 4,
+      ç: 4,
+      d: 3,
+      e: 1,
+      f: 7,
+      g: 5,
+      ğ: 8,
+      h: 5,
+      ı: 2,
+      i: 2,
+      j: 10,
+      k: 1,
+      l: 1,
+      m: 2,
+      n: 1,
+      o: 2,
+      ö: 7,
+      p: 5,
+      r: 1,
+      s: 2,
+      ş: 4,
+      t: 1,
+      u: 3,
+      ü: 7,
+      v: 7,
+      y: 3,
+      z: 4,
     };
-    
+
     let point = 0;
     for (let i = 0; i < word.length; i++) {
       const letter = word[i];
       point += letterPoints[letter];
     }
-    
+
     return point;
-  }
+  };
 
   const letterClick = (letter, rowIndex, columnIndex) => {
+    //TODO: Harf tekrar basıldığında inputtan silinmeli
     setInputValue(inputValue + letter);
     setLettersIndex([...lettersIndex, [rowIndex, columnIndex]]);
   };
@@ -160,9 +234,10 @@ export default function Grid() {
     let newMatrix = [...matrix];
     let isValid = true;
     let lettersIndexes = [...lettersIndex];
-    
+
     if (isValid) {
-      if (words.includes(word)) { // kelime listede varsa
+      if (words.includes(word)) {
+        // kelime listede varsa
         // matrix'i güncelle
         for (let i = 0; i < lettersIndexes.length; i++) {
           let [rowIndex, columnIndex] = lettersIndexes[i];
@@ -174,38 +249,62 @@ export default function Grid() {
         setInputValue("");
         setLettersIndex([]);
         let totalPoint = calculatePoint(word);
-        console.log(totalPoint);
+        setScore(score + totalPoint);
+        // Hız arttırma isteri
+        if ((score) => 100) {
+          setIntervalTime(4000);
+        } else if ((score) => 200) {
+          setIntervalTime(3000);
+        } else if ((score) => 300) {
+          setIntervalTime(2000);
+        } else if ((score) => 400) {
+          setIntervalTime(1000);
+        }
       } else {
         console.log(`${word} is not a valid word!`);
+        setWrongWordCount(wrongWordCount + 1);
+        console.log("Yanlış kelime sayısı", wrongWordCount);
+        if (wrongWordCount === 2) {
+          // Yeni harfleri getir
+          console.log("Yeni harfler getiriliyor", wrongWordCount);
+          let newMatrix = addLetterRow();
+          setMatrix(newMatrix);
+          setWrongWordCount(0);
+        }
       }
     }
   };
 
   return (
-    <View style={styles.map}>
-      {matrix.map((row, rowIndex) => (
-        <View key={rowIndex} style={styles.row}>
-          {row.map((letter, columnIndex) => (
-            <TouchableOpacity
-              key={columnIndex}
-              style={styles.cell}
-              onPress={() => letterClick(letter, rowIndex, columnIndex)}
-            >
-              <Text style={styles.letter}>{letter}</Text>
-            </TouchableOpacity>
-          ))}
-        </View>
-      ))}
-      <TextInput
-        style={styles.input}
-        placeholder="Kelime girin"
-        value={inputValue}
-        onChangeText={(text) => setInputValue(text)}
-      />
-      <TouchableOpacity style={styles.button} onPress={checkWord}>
-        <Text style={styles.buttonText}>Kelimeyi Kontrol Et</Text>
-      </TouchableOpacity>
-    </View>
+    <>
+      <View style={styles.scoreContainer}>
+        <Score score={score} />
+      </View>
+      <View style={styles.map}>
+        {matrix.map((row, rowIndex) => (
+          <View key={rowIndex} style={styles.row}>
+            {row.map((letter, columnIndex) => (
+              <TouchableOpacity
+                key={columnIndex}
+                style={styles.cell}
+                onPress={() => letterClick(letter, rowIndex, columnIndex)}
+              >
+                <Text style={styles.letter}>{letter}</Text>
+              </TouchableOpacity>
+            ))}
+          </View>
+        ))}
+        <TextInput
+          style={styles.input}
+          placeholder="Kelime girin"
+          value={inputValue}
+          onChangeText={(text) => setInputValue(text)}
+        />
+        <TouchableOpacity style={styles.button} onPress={checkWord}>
+          <Text style={styles.buttonText}>Kelimeyi Kontrol Et</Text>
+        </TouchableOpacity>
+      </View>
+    </>
   );
 }
 
@@ -258,5 +357,11 @@ const styles = StyleSheet.create({
     minWidth: 250,
     maxWidth: 250,
     borderRadius: 5,
+  },
+
+  scoreContainer: {
+    marginVertical: 15,
+    justifyContent: "center",
+    alignItems: "center",
   },
 });
