@@ -10,7 +10,14 @@ import words from "../words.json";
 import Score from "./Score";
 
 export default function Grid() {
-  const [matrix, setMatrix] = useState(Array(10).fill(Array(8).fill("")));
+  const [matrix, setMatrix] = useState(
+    Array(10).fill(
+      Array(8).fill({
+        letter: "",
+        isSelected: false,
+      })
+    )
+  );
   const [inputValue, setInputValue] = useState("");
   const [lettersIndex, setLettersIndex] = useState([]);
   const [score, setScore] = useState(0);
@@ -72,12 +79,12 @@ export default function Grid() {
           let filled = false; // hücre dolduruldu mu kontrolü
           for (let i = newMatrix.length - 1; i >= 0; i--) {
             if (
-              newMatrix[i][j] === "" &&
-              newMatrix[i + 1][j] !== "" &&
+              newMatrix[i][j].letter === "" &&
+              newMatrix[i + 1][j].letter !== "" &&
               !filled
             ) {
               const randomLetter = getRandomLetter();
-              newMatrix[i][j] = randomLetter;
+              newMatrix[i][j] = { isSelected: false, letter: randomLetter };
               filled = true; // hücre dolduruldu
               if (i == 0) counter++;
               counter === matrix[matrix.length - 1].length
@@ -100,14 +107,18 @@ export default function Grid() {
     for (let j = 0; j < newMatrix[0].length; j++) {
       let filled = false; // hücre dolduruldu mu kontrolü
       for (let i = newMatrix.length - 1; i >= 0; i--) {
-        if (newMatrix[i][j] === "" && newMatrix[i + 1][j] !== "" && !filled) {
+        if (
+          newMatrix[i][j].letter === "" &&
+          newMatrix[i + 1][j].letter !== "" &&
+          !filled
+        ) {
           const randomLetter = getRandomLetter();
-          newMatrix[i][j] = randomLetter;
+          newMatrix[i][j] = { isSelected: false, letter: randomLetter };
           filled = true; // hücre dolduruldu
           if (i == 0) counter++;
           counter === matrix[matrix.length - 1].length
             ? console.log("Kaybettin")
-            : console.log("Letter rain");
+            : console.log("Letter row");
         }
       }
     }
@@ -142,7 +153,10 @@ export default function Grid() {
     let letters = [];
 
     // Başlangıçta bir sessiz harf ekle
-    letters.push(consonants[Math.floor(Math.random() * consonants.length)]);
+    letters.push({
+      isSelected: false,
+      letter: consonants[Math.floor(Math.random() * consonants.length)],
+    });
 
     for (let i = 1; i < count; i++) {
       // rastgele bir harf seç
@@ -172,7 +186,10 @@ export default function Grid() {
         }
       }
 
-      letters.push(letter);
+      letters.push({
+        isSelected: false,
+        letter,
+      });
     }
 
     // harfleri karıştır
@@ -225,12 +242,26 @@ export default function Grid() {
 
   const letterClick = (letter, rowIndex, columnIndex) => {
     //TODO: Harf tekrar basıldığında inputtan silinmeli
-    setInputValue(inputValue + letter);
-    setLettersIndex([...lettersIndex, [rowIndex, columnIndex]]);
+    if (letter.isSelected) {
+      setInputValue(inputValue.slice(0, -1));
+      setLettersIndex(lettersIndex.slice(0, -1));
+      matrix[rowIndex][columnIndex].isSelected = false;
+    } else {
+      setInputValue(inputValue + letter.letter);
+      setLettersIndex([...lettersIndex, [rowIndex, columnIndex]]);
+      matrix[rowIndex][columnIndex].isSelected = true;
+    }
+
+    // Seçilenin isSelected değerini değiştir
   };
 
   const checkWord = () => {
     let word = inputValue.trim().toLowerCase();
+    setMatrix(
+      matrix.map((row) =>
+        row.map((letter) => ({ ...letter, isSelected: false }))
+      )
+    ); // harflerin isSelected değerlerini sıfırla
     let newMatrix = [...matrix];
     let isValid = true;
     let lettersIndexes = [...lettersIndex];
@@ -262,6 +293,7 @@ export default function Grid() {
         }
       } else {
         console.log(`${word} is not a valid word!`);
+        setInputValue("");
         setWrongWordCount(wrongWordCount + 1);
         console.log("Yanlış kelime sayısı", wrongWordCount);
         if (wrongWordCount === 2) {
@@ -286,10 +318,10 @@ export default function Grid() {
             {row.map((letter, columnIndex) => (
               <TouchableOpacity
                 key={columnIndex}
-                style={styles.cell}
+                style={letter.isSelected ? styles.selectedCell : styles.cell}
                 onPress={() => letterClick(letter, rowIndex, columnIndex)}
               >
-                <Text style={styles.letter}>{letter}</Text>
+                <Text style={styles.letter}>{letter.letter}</Text>
               </TouchableOpacity>
             ))}
           </View>
@@ -322,6 +354,19 @@ const styles = StyleSheet.create({
 
   cell: {
     backgroundColor: "green",
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "center",
+    aspectRatio: 1,
+    borderWidth: 1,
+    borderColor: "black",
+    margin: 2,
+
+    //maxWidth: 50,
+  },
+  selectedCell: {
+    backgroundColor: "gray",
+    borderRadius: 5,
     flex: 1,
     alignItems: "center",
     justifyContent: "center",
