@@ -9,7 +9,7 @@ import { useState, useEffect } from "react";
 import words from "../words.json";
 import Score from "./Score";
 
-export default function Grid() {
+export default function Grid({ navigation }) {
   const [matrix, setMatrix] = useState(
     Array(10).fill(
       Array(8).fill({
@@ -73,6 +73,7 @@ export default function Grid() {
   useEffect(() => {
     const interval = setInterval(() => {
       let counter = 0;
+      let isGameOver = false;
       setMatrix((prevMatrix) => {
         const newMatrix = prevMatrix.map((row) => [...row]); // matrix kopyasını oluştur
         for (let j = 0; j < newMatrix[0].length; j++) {
@@ -88,10 +89,14 @@ export default function Grid() {
               filled = true; // hücre dolduruldu
               if (i == 0) counter++;
               counter === matrix[matrix.length - 1].length
-                ? console.log("Kaybettin")
+                ? (isGameOver = true)
                 : console.log("Devam");
             }
           }
+        }
+        if (isGameOver) {
+          navigation.navigate("Gameover", { score: score });
+          clearInterval(interval);
         }
         return newMatrix;
       });
@@ -307,10 +312,21 @@ export default function Grid() {
     }
   };
 
+  const clearInput = () => {
+    setInputValue("");
+    setLettersIndex([]);
+    setMatrix(
+      matrix.map((row) =>
+        row.map((letter) => ({ ...letter, isSelected: false }))
+      )
+    );
+  };
+
   return (
     <>
       <View style={styles.scoreContainer}>
         <Score score={score} />
+        <Text>Yanlış girilen kelime sayısı: {wrongWordCount}</Text>
       </View>
       <View style={styles.map}>
         {matrix.map((row, rowIndex) => (
@@ -326,14 +342,19 @@ export default function Grid() {
             ))}
           </View>
         ))}
+      </View>
+      <View style={styles.inputContainer}>
         <TextInput
           style={styles.input}
           placeholder="Kelime girin"
           value={inputValue}
           onChangeText={(text) => setInputValue(text)}
         />
-        <TouchableOpacity style={styles.button} onPress={checkWord}>
-          <Text style={styles.buttonText}>Kelimeyi Kontrol Et</Text>
+        <TouchableOpacity style={styles.checkButton} onPress={checkWord}>
+          <Text style={styles.buttonText}>✓</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.clearButton} onPress={clearInput}>
+          <Text style={styles.buttonText}>X</Text>
         </TouchableOpacity>
       </View>
     </>
@@ -342,9 +363,10 @@ export default function Grid() {
 
 const styles = StyleSheet.create({
   map: {
-    backgroundColor: "blue",
+    backgroundColor: "#282828",
     alignSelf: "stretch",
     height: "100%",
+    paddingTop: 15,
   },
 
   row: {
@@ -353,19 +375,20 @@ const styles = StyleSheet.create({
   },
 
   cell: {
-    backgroundColor: "green",
+    backgroundColor: "#8899A6",
     flex: 1,
     alignItems: "center",
     justifyContent: "center",
     aspectRatio: 1,
     borderWidth: 1,
     borderColor: "black",
+    borderRadius: 4,
     margin: 2,
 
     //maxWidth: 50,
   },
   selectedCell: {
-    backgroundColor: "gray",
+    backgroundColor: "#576CBC",
     borderRadius: 5,
     flex: 1,
     alignItems: "center",
@@ -393,20 +416,52 @@ const styles = StyleSheet.create({
   },
 
   input: {
-    borderWidth: 1,
-    borderColor: "white",
+    backgroundColor: "#404040",
+    color: "white",
     padding: 10,
-    marginVertical: 10,
-    marginLeft: 70,
     fontSize: 20,
-    minWidth: 250,
-    maxWidth: 250,
-    borderRadius: 5,
+    width: 280,
+    borderRadius: 4,
   },
 
   scoreContainer: {
-    marginVertical: 15,
+    paddingVertical: 15,
     justifyContent: "center",
     alignItems: "center",
+    backgroundColor: "#282828",
+  },
+
+  inputContainer: {
+    position: "absolute",
+    bottom: 180,
+    left: 55,
+  },
+
+  clearButton: {
+    justifyContent: "center",
+    alignItems: "center",
+    width: 45,
+    height: 45,
+    backgroundColor: "#B33A3A",
+    borderRadius: 4,
+    position: "absolute",
+    left: -48,
+  },
+
+  checkButton: {
+    justifyContent: "center",
+    alignItems: "center",
+    width: 45,
+    height: 45,
+    backgroundColor: "#00FF00",
+    borderRadius: 4,
+    position: "absolute",
+    right: -48,
+  },
+
+  buttonText: {
+    color: "white",
+    fontSize: 26,
+    fontWeight: "bold",
   },
 });
