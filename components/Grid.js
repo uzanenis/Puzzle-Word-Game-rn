@@ -8,7 +8,8 @@ import {
 import { useState, useEffect } from "react";
 import words from "../words.json";
 import Score from "./Score";
-
+import { useDispatch } from 'react-redux';
+import { addPoint } from '../redux/actions';
 export default function Grid({ navigation }) {
   const [matrix, setMatrix] = useState(
     Array(10).fill(
@@ -23,7 +24,8 @@ export default function Grid({ navigation }) {
   const [score, setScore] = useState(0);
   const [intervalTime, setIntervalTime] = useState(5000);
   const [wrongWordCount, setWrongWordCount] = useState(0);
-
+  const [scoreForEffect, setScoreForEffect] = useState(0);
+  const dispatch = useDispatch();
   useEffect(() => {
     // 8. satır için rastgele harfler oluştur
     let row10 = getRandomLetters(8);
@@ -72,12 +74,12 @@ export default function Grid({ navigation }) {
 
   useEffect(() => {
     const interval = setInterval(() => {
-      let counter = 0;
       let isGameOver = false;
       setMatrix((prevMatrix) => {
         const newMatrix = prevMatrix.map((row) => [...row]); // matrix kopyasını oluştur
         for (let j = 0; j < newMatrix[0].length; j++) {
           let filled = false; // hücre dolduruldu mu kontrolü
+          let counter = 0; // sütundaki dolu hücre sayısı
           for (let i = newMatrix.length - 1; i >= 0; i--) {
             if (
               newMatrix[i][j].letter === "" &&
@@ -87,22 +89,22 @@ export default function Grid({ navigation }) {
               const randomLetter = getRandomLetter();
               newMatrix[i][j] = { isSelected: false, letter: randomLetter };
               filled = true; // hücre dolduruldu
-              if (i == 0) counter++;
-              counter === matrix[matrix.length - 1].length
-                ? (isGameOver = true)
-                : console.log("Devam");
             }
+            if (newMatrix[i][j].letter !== "") counter++;
           }
+          if (counter === newMatrix.length) isGameOver = true; // sütunda tüm hücreler dolu
         }
         if (isGameOver) {
-          navigation.navigate("Gameover", { score: score });
+          navigation.navigate("Gameover", { score: scoreForEffect });
+          dispatch(addPoint(scoreForEffect));
           clearInterval(interval);
         }
         return newMatrix;
       });
     }, intervalTime);
     return () => clearInterval(interval);
-  }, []);
+  }, [scoreForEffect]);
+
 
   // 3 kere yanlış girildiğinde bir satırlık kelime ekliyor
   const addLetterRow = () => {
@@ -286,6 +288,7 @@ export default function Grid({ navigation }) {
         setLettersIndex([]);
         let totalPoint = calculatePoint(word);
         setScore(score + totalPoint);
+        setScoreForEffect(score + totalPoint);
         // Hız arttırma isteri
         if ((score) => 100) {
           setIntervalTime(4000);

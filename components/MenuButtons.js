@@ -1,6 +1,5 @@
 import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
 import React from "react";
-
 const MenuButtons = ({ onPress }) => {
   return (
     <TouchableOpacity style={styles.container} onPress={onPress}>

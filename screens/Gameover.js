@@ -1,6 +1,6 @@
 import { View, StyleSheet, Text, SafeAreaView, TouchableOpacity } from "react-native";
 import React from "react";
-
+import PointsList from "../components/PointsList";
 const Gameover = ({ navigation, route }) => {
   const onPress = () => {
     navigation.navigate("Menu");
@@ -11,6 +11,7 @@ const Gameover = ({ navigation, route }) => {
       <View style={styles.container}>
         <Text style={styles.title}>Game Over!</Text>
         <Text style={styles.score}>{route.params.score} puan!</Text>
+        <PointsList />
         <TouchableOpacity style={styles.buttonContainer} onPress={onPress}>
           <View>
             <Text style={styles.buttonText}>Play Word Challange Again!</Text>
