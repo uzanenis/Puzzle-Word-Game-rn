@@ -1,7 +1,7 @@
 import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { Provider } from 'react-redux';
-import { store } from './redux/store'; // redux store'u dahil ediyoruz
+import store from './redux/store'; // redux store'u dahil ediyoruz
 import Menu from "./screens/Menu";
 import Game from "./screens/Game";
 import Gameover from "./screens/Gameover";

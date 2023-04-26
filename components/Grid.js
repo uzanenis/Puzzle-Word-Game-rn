@@ -77,22 +77,25 @@ export default function Grid({ navigation }) {
       let isGameOver = false;
       setMatrix((prevMatrix) => {
         const newMatrix = prevMatrix.map((row) => [...row]); // matrix kopyasını oluştur
-        for (let j = 0; j < newMatrix[0].length; j++) {
-          let filled = false; // hücre dolduruldu mu kontrolü
-          let counter = 0; // sütundaki dolu hücre sayısı
-          for (let i = newMatrix.length - 1; i >= 0; i--) {
-            if (
-              newMatrix[i][j].letter === "" &&
-              newMatrix[i + 1][j].letter !== "" &&
-              !filled
-            ) {
+        const column = Math.floor(Math.random() * newMatrix[0].length); // rastgele bir sütun seç
+        let rowIndex = newMatrix.length - 1; // sütundaki en alt satırdan başla
+        while (rowIndex >= 0) {
+          if (newMatrix[rowIndex][column].letter === "") { // boş hücre bulundu
+            const prevLetter = newMatrix[rowIndex + 1][column].letter;
+            if (prevLetter !== "") { // altındaki hücre doluysa
               const randomLetter = getRandomLetter();
-              newMatrix[i][j] = { isSelected: false, letter: randomLetter };
-              filled = true; // hücre dolduruldu
+              newMatrix[rowIndex][column] = { isSelected: false, letter: randomLetter };
+              break; // döngüyü sonlandır
             }
-            if (newMatrix[i][j].letter !== "") counter++;
           }
-          if (counter === newMatrix.length) isGameOver = true; // sütunda tüm hücreler dolu
+          rowIndex--;
+        }
+        // Herhangi bir sütunun en üstteki hücresi boş değilse oyun biter
+        for (let j = 0; j < newMatrix[0].length; j++) {
+          if (newMatrix[0][j].letter !== "") {
+            isGameOver = true;
+            break;
+          }
         }
         if (isGameOver) {
           navigation.navigate("Gameover", { score: scoreForEffect });
@@ -104,6 +107,17 @@ export default function Grid({ navigation }) {
     }, intervalTime);
     return () => clearInterval(interval);
   }, [scoreForEffect]);
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+
 
 
   // 3 kere yanlış girildiğinde bir satırlık kelime ekliyor
@@ -290,14 +304,14 @@ export default function Grid({ navigation }) {
         setScore(score + totalPoint);
         setScoreForEffect(score + totalPoint);
         // Hız arttırma isteri
-        if ((score) => 100) {
-          setIntervalTime(4000);
-        } else if ((score) => 200) {
-          setIntervalTime(3000);
-        } else if ((score) => 300) {
+        if ((score) => 10) {
           setIntervalTime(2000);
-        } else if ((score) => 400) {
+        } else if ((score) => 20) {
+          setIntervalTime(1500);
+        } else if ((score) => 30) {
           setIntervalTime(1000);
+        } else if ((score) => 40) {
+          setIntervalTime(500);
         }
       } else {
         console.log(`${word} is not a valid word!`);
@@ -334,18 +348,23 @@ export default function Grid({ navigation }) {
       <View style={styles.map}>
         {matrix.map((row, rowIndex) => (
           <View key={rowIndex} style={styles.row}>
-            {row.map((letter, columnIndex) => (
+            {row.map((cell, columnIndex) => (
               <TouchableOpacity
                 key={columnIndex}
-                style={letter.isSelected ? styles.selectedCell : styles.cell}
-                onPress={() => letterClick(letter, rowIndex, columnIndex)}
+                style={[
+                  styles.cell,
+                  cell.letter ? null : styles.emptyCell,
+                  cell.isSelected ? styles.selectedCell : null,
+                ]}
+                onPress={() => letterClick(cell, rowIndex, columnIndex)}
               >
-                <Text style={styles.letter}>{letter.letter}</Text>
+                {cell.letter && <Text style={styles.letter}>{cell.letter}</Text>}
               </TouchableOpacity>
             ))}
           </View>
         ))}
       </View>
+
       <View style={styles.inputContainer}>
         <TextInput
           style={styles.input}
@@ -384,7 +403,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     aspectRatio: 1,
     borderWidth: 1,
-    borderColor: "black",
+    borderColor: "#282828",
     borderRadius: 4,
     margin: 2,
 
@@ -466,5 +485,9 @@ const styles = StyleSheet.create({
     color: "white",
     fontSize: 26,
     fontWeight: "bold",
+  },
+
+  emptyCell: {
+    backgroundColor: "#282828",
   },
 });
