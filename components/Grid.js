@@ -104,21 +104,20 @@ export default function Grid({ navigation }) {
         }
         return newMatrix;
       });
+
+      if ((score) >= 100) {
+        setIntervalTime(2000);
+      } else if ((score) >= 200) {
+        setIntervalTime(1500);
+      } else if ((score) >= 300) {
+        setIntervalTime(1000);
+      } else if ((score) >= 400) {
+        setIntervalTime(500);
+      }
+
     }, intervalTime);
     return () => clearInterval(interval);
   }, [scoreForEffect]);
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-
-
 
   // 3 kere yanlış girildiğinde bir satırlık kelime ekliyor
   const addLetterRow = () => {
@@ -278,11 +277,7 @@ export default function Grid({ navigation }) {
 
   const checkWord = () => {
     let word = inputValue.trim().toLowerCase();
-    setMatrix(
-      matrix.map((row) =>
-        row.map((letter) => ({ ...letter, isSelected: false }))
-      )
-    ); // harflerin isSelected değerlerini sıfırla
+
     let newMatrix = [...matrix];
     let isValid = true;
     let lettersIndexes = [...lettersIndex];
@@ -298,21 +293,17 @@ export default function Grid({ navigation }) {
           }
         }
         setMatrix(newMatrix);
+        setMatrix(
+          matrix.map((row) =>
+            row.map((letter) => ({ ...letter, isSelected: false }))
+          )
+        );
         setInputValue("");
         setLettersIndex([]);
         let totalPoint = calculatePoint(word);
         setScore(score + totalPoint);
         setScoreForEffect(score + totalPoint);
-        // Hız arttırma isteri
-        if ((score) => 10) {
-          setIntervalTime(2000);
-        } else if ((score) => 20) {
-          setIntervalTime(1500);
-        } else if ((score) => 30) {
-          setIntervalTime(1000);
-        } else if ((score) => 40) {
-          setIntervalTime(500);
-        }
+
       } else {
         console.log(`${word} is not a valid word!`);
         setInputValue("");
@@ -343,7 +334,7 @@ export default function Grid({ navigation }) {
     <>
       <View style={styles.scoreContainer}>
         <Score score={score} />
-        <Text>Yanlış girilen kelime sayısı: {wrongWordCount}</Text>
+        <Text style={styles.wrongCount}>Wrong words count: {wrongWordCount}</Text>
       </View>
       <View style={styles.map}>
         {matrix.map((row, rowIndex) => (
@@ -356,6 +347,7 @@ export default function Grid({ navigation }) {
                   cell.letter ? null : styles.emptyCell,
                   cell.isSelected ? styles.selectedCell : null,
                 ]}
+                disabled={!cell.letter}
                 onPress={() => letterClick(cell, rowIndex, columnIndex)}
               >
                 {cell.letter && <Text style={styles.letter}>{cell.letter}</Text>}
@@ -488,6 +480,13 @@ const styles = StyleSheet.create({
   },
 
   emptyCell: {
-    backgroundColor: "#282828",
+    opacity: 0,
+  },
+
+  wrongCount: {
+    color: "white",
+    fontSize: 16,
+    fontWeight: "bold",
+    marginTop: 10,
   },
 });
