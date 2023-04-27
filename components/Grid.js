@@ -308,6 +308,11 @@ export default function Grid({ navigation }) {
         console.log(`${word} is not a valid word!`);
         setInputValue("");
         setWrongWordCount(wrongWordCount + 1);
+        setMatrix(
+          matrix.map((row) =>
+            row.map((letter) => ({ ...letter, isSelected: false }))
+          )
+        );
         console.log("Yanlış kelime sayısı", wrongWordCount);
         if (wrongWordCount === 2) {
           // Yeni harfleri getir
