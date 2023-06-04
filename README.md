@@ -2,7 +2,8 @@
 
 ## Screenshots
 
-<img width="485" alt="Screenshot 2023-06-04 at 22 47 36" src="https://github.com/uzanenis/Puzzle-Word-Game-rn/assets/73305571/aa52116d-d970-4289-9c7b-b52614fefaf4">
+<img width="485" alt="Screenshot 2023-06-04 at 22 46 54" src="https://github.com/uzanenis/Puzzle-Word-Game-rn/assets/73305571/c4149a2f-cae6-4241-bcc5-be6f90719365">
+
 
 <img width="485" alt="Screenshot 2023-06-04 at 22 47 04" src="https://github.com/uzanenis/Puzzle-Word-Game-rn/assets/73305571/ee9e27d1-bc57-4617-b967-eae3c456a425">
 
